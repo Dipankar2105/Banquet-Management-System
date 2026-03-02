@@ -196,7 +196,7 @@ model Lead {
 
   // Relations
   activities LeadActivity[]
-  booking    Booking?
+  bookings   Booking[]
 
   @@index([branchId, status])
   @@index([branchId, assignedToId])
@@ -240,7 +240,7 @@ model Booking {
   branch      Branch @relation(fields: [branchId], references: [id])
   hallId      String
   hall        Hall   @relation(fields: [hallId], references: [id])
-  leadId      String @unique
+  leadId      String
   lead        Lead   @relation(fields: [leadId], references: [id])
   createdById String
   createdBy   User   @relation("CreatedBookings", fields: [createdById], references: [id])

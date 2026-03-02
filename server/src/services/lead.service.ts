@@ -44,7 +44,7 @@ export class LeadService {
                 assignedTo: { select: { id: true, name: true, email: true } },
                 createdBy: { select: { id: true, name: true } },
                 activities: { orderBy: { createdAt: "desc" }, take: 20 },
-                booking: true,
+                bookings: true,
                 branch: { select: { id: true, name: true } },
             },
         });

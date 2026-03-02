@@ -28,6 +28,7 @@ import {
 } from "recharts";
 import PageHeader from "@/components/ui/PageHeader";
 import GlassCard from "@/components/ui/GlassCard";
+import AITextRenderer from "@/components/ui/AITextRenderer";
 import { cn, formatCurrency } from "@/lib/utils";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
@@ -226,7 +227,7 @@ export default function AIRevenuePage() {
                                             contentStyle={{ backgroundColor: '#1A1A1A', border: '1px solid #333', borderRadius: '8px' }}
                                         />
                                         <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                                            {data.branch_summary.map((entry, index) => (
+                                            {data.branch_summary.map((_, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Bar>
@@ -256,7 +257,7 @@ export default function AIRevenuePage() {
                                                 paddingAngle={5}
                                                 dataKey="revenue"
                                             >
-                                                {data.branch_summary.map((entry, index) => (
+                                                {data.branch_summary.map((_, index) => (
                                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                                 ))}
                                             </Pie>
@@ -315,15 +316,24 @@ export default function AIRevenuePage() {
                     </div>
                     <div className="p-5 space-y-6 overflow-y-auto" style={{ maxHeight: "400px" }}>
                         {data?.branch_summary.map((branch, idx) => (
-                            <div key={idx} className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-white">{branch.branch_name}</span>
-                                    {branch.is_weak && <span className="bg-red-500/10 text-red-400 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Needs Attention</span>}
-                                    {branch.is_dominant && <span className="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Top Performer</span>}
+                            <div key={idx} className="group">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className={cn(
+                                            "w-2 h-2 rounded-full",
+                                            branch.is_weak ? "bg-red-400" : branch.is_dominant ? "bg-emerald-400" : "bg-gold-500"
+                                        )} />
+                                        <span className="text-sm font-semibold text-white group-hover:text-gold-400 transition-colors uppercase tracking-tight">{branch.branch_name}</span>
+                                    </div>
+                                    {branch.is_weak && <span className="bg-red-500/10 text-red-400 text-[9px] px-2 py-0.5 rounded-full border border-red-500/20 font-bold">CRITICAL</span>}
+                                    {branch.is_dominant && <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold">TOP</span>}
                                 </div>
                                 {showFullSummary && (
-                                    <div className="bg-surface/50 p-3 rounded-lg border border-border/50 text-xs leading-relaxed text-gray-300">
-                                        {branch.suggestion}
+                                    <div className="bg-white/[0.03] p-3 rounded-xl border border-white/10 text-xs leading-relaxed text-gray-400 flex gap-3 shadow-inner">
+                                        <div className="h-4 w-4 mt-0.5 shrink-0 text-gold-500/50">
+                                            <Sparkles className="h-full w-full" />
+                                        </div>
+                                        <span>{branch.suggestion}</span>
                                     </div>
                                 )}
                             </div>
@@ -462,14 +472,34 @@ export default function AIRevenuePage() {
                                 <p className="text-sm text-red-400 leading-relaxed text-left">{errorMsg}</p>
                             </div>
                         ) : (
-                            <div className="text-sm text-gray-300 w-full text-left space-y-3">
-                                <p className="font-medium text-white mb-2">Automated Directives:</p>
-                                <ul className="space-y-2 list-disc pl-5">
-                                    <li>Focus on increasing off-peak bookings</li>
-                                    <li>Optimize package pricing upsales</li>
-                                    <li>Review incoming leads pipeline daily</li>
-                                </ul>
-                                <p className="text-xs text-muted mt-4 italic">Use the Revenue Copilot chat below for deeper operational and marketing guidance.</p>
+                            <div className="text-sm text-gray-300 w-full text-left space-y-4">
+                                <div className="flex items-center gap-2 text-white font-bold tracking-tight">
+                                    <Sparkles className="h-4 w-4 text-gold-400" />
+                                    <span>Branch Optimization Directive</span>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="bg-white/[0.02] border border-white/10 p-4 rounded-xl shadow-md">
+                                        <p className="text-sm text-gold-200 mb-2 font-medium">Strategic Objective:</p>
+                                        <p className="text-xs text-gray-400 leading-relaxed italic border-l-2 border-gold-500/50 pl-3">
+                                            {data?.branch_summary[0]?.suggestion || "Focus on operational efficiency and lead conversion."}
+                                        </p>
+                                    </div>
+                                    <ul className="space-y-2.5">
+                                        {[
+                                            "Target off-peak booking gaps with tiered event packages",
+                                            "Automate follow-ups for mid-tier inactive leads",
+                                            "Review inventory turnaround for premium banquet halls"
+                                        ].map((item, i) => (
+                                            <li key={i} className="flex gap-3 items-center text-xs text-gray-400 group">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-gold-500/30 group-hover:bg-gold-500 transition-colors" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-4 italic bg-gold-500/5 px-3 py-2 rounded-lg border border-gold-500/10">
+                                    Use the Copilot chat below for real-time tactical adjustments.
+                                </p>
                             </div>
                         )}
                     </div>
@@ -556,10 +586,14 @@ export default function AIRevenuePage() {
                                         : "bg-surface border border-border text-gray-200 rounded-bl-none"
                                 )}
                             >
-                                <div className={cn(
-                                    "whitespace-pre-wrap",
-                                    msg.content.startsWith("⚠️") && "text-red-400 font-medium"
-                                )}>{msg.content}</div>
+                                {msg.role === "user" || msg.content.startsWith("⚠️") ? (
+                                    <div className={cn(
+                                        "whitespace-pre-wrap",
+                                        msg.content.startsWith("⚠️") && "text-red-400 font-medium"
+                                    )}>{msg.content}</div>
+                                ) : (
+                                    <AITextRenderer content={msg.content} />
+                                )}
                             </div>
                         </div>
                     ))}

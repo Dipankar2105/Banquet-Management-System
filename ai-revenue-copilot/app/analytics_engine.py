@@ -23,11 +23,13 @@ def calculate_analytics(bookings: List[Booking]) -> Dict[str, Any]:
         is_weak = revenue_share < 20
         is_dominant = revenue_share > 40
         
-        suggestion = "Keep up the good work."
-        if occupancy > 80:
-            suggestion = "Suggest price increase."
-        elif occupancy < 50:
-            suggestion = "Suggest marketing push."
+        suggestion = "Stable performance. Focus on maintaining service quality."
+        if occupancy > 85:
+            suggestion = "High demand detected. Review premium pricing tiered for peak hours."
+        elif occupancy < 45:
+            suggestion = "Lower occupancy than average. Initiate targeted micro-marketing for corporate events."
+        elif revenue_share < 15:
+            suggestion = "Limited revenue contribution. Audit package inclusions to improve upsell conversion."
             
         branch_summaries.append(BranchSummary(
             branch_name=b.branch_name,

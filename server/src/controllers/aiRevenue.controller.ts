@@ -17,8 +17,7 @@ export const aiRevenueController = async (req: Request, res: Response, _next: Ne
                 branchData = branches.map((b: any) => {
                     const totalRevenue = b.bookings.reduce((sum: number, bk: any) => sum + bk.totalAmount, 0);
                     const totalCapacity = b.halls.reduce((sum: number, h: any) => sum + h.capacity, 0) || 500;
-                    const bookedEvents = b.bookings.length * 100;
-
+                    const bookedEvents = b.bookings.reduce((sum: number, bk: any) => sum + (bk.guestCount || 0), 0);
                     // If no real data yet, provide a realistic demo baseline using real branch names
                     const demoRev = Math.floor(Math.random() * 100000) + 50000;
                     const demoBook = Math.floor(totalCapacity * (Math.random() * 0.4 + 0.4));

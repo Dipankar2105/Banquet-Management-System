@@ -46,7 +46,7 @@ export class BookingService {
             const conflicts = await tx.$queryRaw<{ id: string }[]>`
         SELECT id FROM bookings
         WHERE "hallId" = ${data.hallId}
-          AND status != 'CANCELLED'
+          AND status != 'CANCELLED'::"BookingStatus"
           AND "startDate" <= ${endDate}
           AND "endDate" >= ${startDate}
         FOR UPDATE
@@ -86,6 +86,41 @@ export class BookingService {
                     branch: { select: { id: true, name: true } },
                 },
             });
+
+            // ── Step 4: Create Associated Invoice & Advance Payment ──
+            const invCount = await tx.invoice.count({ where: { branchId: data.branchId } });
+            const invoiceNumber = generateRefNumber("INV", invCount + 1);
+
+            const taxRate = 18;
+            const subtotal = data.totalAmount / (1 + taxRate / 100);
+            const taxAmount = data.totalAmount - subtotal;
+
+            const invoice = await tx.invoice.create({
+                data: {
+                    invoiceNumber,
+                    bookingId: booking.id,
+                    branchId: data.branchId,
+                    subtotal,
+                    taxRate,
+                    taxAmount,
+                    totalAmount: data.totalAmount,
+                    paidAmount: data.advanceAmount,
+                    dueDate: startDate,
+                    status: data.advanceAmount >= data.totalAmount ? "PAID" : (data.advanceAmount > 0 ? "PARTIALLY_PAID" : "DRAFT"),
+                }
+            });
+
+            if (data.advanceAmount > 0) {
+                await tx.payment.create({
+                    data: {
+                        amount: data.advanceAmount,
+                        method: "UPI",
+                        type: "ADVANCE",
+                        invoiceId: invoice.id,
+                        receivedById: userId,
+                    }
+                });
+            }
 
             return booking;
         }, {

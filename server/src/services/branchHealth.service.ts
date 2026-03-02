@@ -35,8 +35,10 @@ export const fetchRealBranchData = async (branchScope?: string) => {
             (sum: number, h: { capacity: number }) => sum + h.capacity,
             0
         );
-        const totalBooked = branch.bookings.length;
-
+        const totalBooked = branch.bookings.reduce(
+            (sum: number, b: { guestCount: number }) => sum + b.guestCount,
+            0
+        );
         return {
             branch_id: branch.id,
             branch_name: branch.name,

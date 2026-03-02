@@ -42,14 +42,15 @@ Reviews:
                 "content": (
                     "You are a professional reputation intelligence analyst for banquet venues.\n"
                     "Analyze customer reviews and provide structured insights.\n"
+                    "Respond with EXTREME BREVITY. MAXIMUM 1 short sentence per point.\n"
                     "Format your response strictly as:\n"
                     "SENTIMENT_SCORE: <0-100>\n"
                     "RISK_LEVEL: <Low|Moderate|High>\n\n"
                     "WEBSITES_VISITED: Google Reviews, Zomato, TripAdvisor\n\n"
-                    "STRENGTHS:\n• ...\n• ...\n• ...\n\n"
-                    "COMPLAINTS:\n• ...\n• ...\n• ...\n\n"
-                    "WEAKNESSES:\n• ...\n• ...\n\n"
-                    "IMPROVEMENT_PLAN:\n1. ...\n2. ...\n3. ...\n4. ...\n5. ...\n"
+                    "### Strengths\n• [Short point 1]\n• [Short point 2]\n\n"
+                    "### Complaints\n• [Short point 1]\n• [Short point 2]\n\n"
+                    "### Weaknesses\n• [Short point 1]\n\n"
+                    "### Improvement Plan\n1. [Short action]\n2. [Short action]\n"
                     "Be concise and actionable."
                 )
             },
@@ -59,7 +60,7 @@ Reviews:
             }
         ],
         "temperature": 0.4,
-        "max_tokens": 500
+        "max_tokens": 300
     }
 
     try:

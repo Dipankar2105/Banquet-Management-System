@@ -223,13 +223,14 @@ export default function NewBookingPage() {
                 navigate("/bookings");
             }
         } catch (err: any) {
-            const msg = err.response?.data?.message || err.response?.data?.errors?.[0]?.message || err.message || "Failed to create booking";
+            const msg = err.response?.data?.error || err.response?.data?.message || err.response?.data?.errors?.[0]?.message || err.message || "Failed to create booking";
             toast.error(msg);
             console.error("Booking creation error:", err.response?.data || err);
         } finally {
             setSubmitting(false);
         }
     };
+
 
     const balance = (parseFloat(form.totalAmount || "0") - parseFloat(form.advanceAmount || "0"));
 

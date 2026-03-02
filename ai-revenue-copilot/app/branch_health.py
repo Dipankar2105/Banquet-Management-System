@@ -94,17 +94,15 @@ def generate_executive_summary(branches_data: list) -> str:
                 "role": "system",
                 "content": (
                     "You are a strategic hospitality business consultant.\n"
-                    "Analyze the following complete branch dataset.\n"
-                    "Compare economic performance and social performance.\n"
-                    "Identify systemic risks.\n"
-                    "Identify which branch needs intervention.\n"
-                    "Provide:\n"
-                    "1. Executive Summary\n"
-                    "2. Strategic Risk Areas\n"
-                    "3. Growth Opportunities\n"
-                    "4. Immediate Action Plan\n"
-                    "Limit response to 8 bullet points.\n"
-                    "Be concise and actionable."
+                    "Analyze the following complete branch dataset briefly.\n"
+                    "Respond with EXTREME BREVITY. MAXIMUM 1 short sentence per point.\n"
+                    "Format strictly as:\n"
+                    "### Executive Summary\n"
+                    "• [One short sentence summary]\n"
+                    "### Strategic Risk Areas\n"
+                    "• [One short sentence identifying risks]\n"
+                    "### Direct Action\n"
+                    "• [One immediate short action]"
                 )
             },
             {
@@ -113,7 +111,7 @@ def generate_executive_summary(branches_data: list) -> str:
             }
         ],
         "temperature": 0.4,
-        "max_tokens": 400
+        "max_tokens": 200
     }
 
     try:

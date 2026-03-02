@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import PageHeader from "@/components/ui/PageHeader";
 import GlassCard from "@/components/ui/GlassCard";
+import AITextRenderer from "@/components/ui/AITextRenderer";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
 
@@ -56,7 +57,6 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
     Critical: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
 };
 
-const CHART_COLORS = ["#D4AF37", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"];
 
 export default function BranchHealthPage() {
     const { user } = useAuthStore();
@@ -379,9 +379,7 @@ export default function BranchHealthPage() {
                                 className="p-6"
                             >
                                 <div className="bg-surface/50 rounded-xl border border-border/50 p-5">
-                                    <pre className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed font-sans">
-                                        {report.ai_executive_summary}
-                                    </pre>
+                                    <AITextRenderer content={report.ai_executive_summary} className="text-gray-300" />
                                 </div>
                             </motion.div>
                         )}

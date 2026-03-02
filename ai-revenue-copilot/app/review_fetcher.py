@@ -217,7 +217,7 @@ Make some positive, some critical, mimicking Google/Zomato."""
         }
         
         data = {
-            "model": "google/gemini-2.5-pro",
+            "model": "meta-llama/llama-3-8b-instruct",
             "messages": [
                 {"role": "system", "content": "You are a direct data extraction API."},
                 {"role": "user", "content": prompt}

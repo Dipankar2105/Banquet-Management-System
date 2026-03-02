@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import GlassCard from "@/components/ui/GlassCard";
+import AITextRenderer from "@/components/ui/AITextRenderer";
 import api from "@/lib/api";
 
 interface ReviewResult {
@@ -311,9 +312,7 @@ export default function ReputationPage() {
                         </div>
                         <div className="p-6">
                             <div className="bg-surface/50 rounded-xl border border-border/50 p-5">
-                                <pre className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed font-sans">
-                                    {result.analysis}
-                                </pre>
+                                <AITextRenderer content={result.analysis} className="text-gray-300" />
                             </div>
                         </div>
                     </GlassCard>
