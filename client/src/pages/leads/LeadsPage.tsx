@@ -80,9 +80,23 @@ export default function LeadsPage() {
         setLeads((prev) =>
             prev.map((l) => (l.id === draggedLead.id ? { ...l, status } : l))
         );
+        const leadId = draggedLead.id;
         setDraggedLead(null);
         setDragOverColumn(null);
-        toast.success(`Lead moved to ${LEAD_STATUS_LABELS[status] || status}`);
+
+        try {
+            await api.patch(`/leads/${leadId}`, { status });
+            toast.success(`Lead moved to ${LEAD_STATUS_LABELS[status] || status}`);
+        } catch (err: any) {
+            console.error("Failed to sync lead status:", err);
+            // Revert on error if NOT a demo lead
+            if (!leadId.startsWith("demo-")) {
+                setLeads(apiLeads);
+                toast.error("Failed to sync change with server");
+            } else {
+                toast.success(`Lead moved locally (Demo mode)`);
+            }
+        }
     };
 
     const handleCreateLead = async (e: React.FormEvent) => {

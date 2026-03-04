@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { NotFoundError } from "../utils/errors.js";
+import { TwilioService } from "./twilio.service.js";
 import type { PaginationParams } from "../types/index.js";
 
 export class LeadService {
@@ -79,6 +80,10 @@ export class LeadService {
                 details: `Status: ${lead.status}`,
             },
         });
+
+        // ── Send SMS Notification (Async) ──
+        // Not awaiting to avoid blocking response
+        TwilioService.sendLeadNotification(lead);
 
         return lead;
     }

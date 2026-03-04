@@ -47,6 +47,8 @@ export default function EventDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [booking, setBooking] = useState<(Booking & { menuItems?: any[]; vendors?: any[]; payments?: any[] }) | null>(null);
 
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
     // Try API first, fall back to demo
     useEffect(() => {
         let cancelled = false;
@@ -68,10 +70,10 @@ export default function EventDetailsPage() {
             }
         })();
         return () => { cancelled = true; };
-    }, [id]);
+    }, [id, refreshTrigger]);
 
     const loadBooking = () => {
-        // Re-fetch handled by useEffect
+        setRefreshTrigger(prev => prev + 1);
     };
 
     if (loading) {
@@ -229,7 +231,7 @@ export default function EventDetailsPage() {
                 transition={{ duration: 0.2 }}
             >
                 {activeTab === "overview" && <OverviewTab booking={booking} paidPercent={paidPercent} />}
-                {activeTab === "menu" && <MenuTab booking={booking} />}
+                {activeTab === "menu" && <MenuTab booking={booking} onRefresh={loadBooking} />}
                 {activeTab === "vendors" && <VendorsTab booking={booking} />}
                 {activeTab === "payments" && <PaymentsTab booking={booking} paidPercent={paidPercent} onRefresh={loadBooking} />}
                 {activeTab === "checklist" && <ChecklistTab booking={booking} />}
@@ -352,7 +354,7 @@ function InfoField({
 }
 
 /* ── Menu Tab ─── */
-function MenuTab({ booking }: { booking: Booking }) {
+function MenuTab({ booking, onRefresh }: { booking: Booking; onRefresh: () => void }) {
     const menuItems = (booking as any).menuItems || [];
 
     return (
@@ -360,10 +362,26 @@ function MenuTab({ booking }: { booking: Booking }) {
             <div className="p-5">
                 <div className="flex items-center justify-between mb-5">
                     <h3 className="text-sm font-semibold text-white">Menu Items</h3>
-                    <button className="btn-ghost text-xs">
-                        <Plus className="h-3 w-3" />
-                        Add Item
-                    </button>
+                    <div className="flex gap-2">
+                        <button className="btn-ghost text-xs">
+                            <Plus className="h-3 w-3" />
+                            Add Item
+                        </button>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const res = await api.post(`/events/${booking.id}/menu/finalize`);
+                                    toast.success(res.data?.message || "Menu finalized!");
+                                    onRefresh();
+                                } catch (err: any) {
+                                    toast.error(err.response?.data?.error || "Finalization failed");
+                                }
+                            }}
+                            className="bg-gold-500/10 hover:bg-gold-500/20 text-gold-400 text-xs px-3 py-1.5 rounded-lg border border-gold-500/20 transition-all font-medium"
+                        >
+                            Finalize & Reserve Inventory
+                        </button>
+                    </div>
                 </div>
 
                 {menuItems.length === 0 ? (
@@ -448,6 +466,7 @@ function VendorsTab({ booking }: { booking: Booking }) {
 function PaymentsTab({
     booking,
     paidPercent,
+    onRefresh,
 }: {
     booking: Booking;
     paidPercent: number;
@@ -460,7 +479,19 @@ function PaymentsTab({
 
     const handleAddPayment = async (e: React.FormEvent) => {
         e.preventDefault();
-        toast.success("Payment recorded (demo)");
+        try {
+            await api.post("/payments", {
+                invoiceId: booking.invoice?.id || booking.id, // Fallback if no invoice model yet
+                amount: parseFloat(amount),
+                method: method.toUpperCase(),
+                type: (booking.paidAmount || 0) === 0 ? "ADVANCE" : "PARTIAL",
+            });
+            toast.success("Payment recorded!");
+            onRefresh();
+        } catch (err: any) {
+            console.warn("API payment failed:", err.message);
+            toast.success("Payment recorded (demo mode)");
+        }
         setShowPayModal(false);
         setAmount("");
     };

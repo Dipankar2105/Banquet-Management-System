@@ -10,6 +10,7 @@ export const aiRevenueController = async (req: Request, res: Response, _next: Ne
 
         if (!branchData) {
             const branches = await prisma.branch.findMany({
+                where: req.branchScope ? { id: req.branchScope } : {},
                 include: { halls: true, bookings: true }
             });
 

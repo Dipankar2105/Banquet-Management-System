@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { ConflictError, NotFoundError } from "../utils/errors.js";
 import { generateRefNumber } from "../utils/helpers.js";
+import { TwilioService } from "./twilio.service.js";
 import type { PaginationParams } from "../types/index.js";
 import { Prisma, PrismaClient } from "@prisma/client";
 
@@ -42,6 +43,7 @@ export class BookingService {
         const endDate = new Date(data.endDate);
 
         return prisma.$transaction(async (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
+            console.log("[BookingService] Step 1: Checking conflicts...");
             // ── Step 1: Lock & check for conflicts ──
             const conflicts = await tx.$queryRaw<{ id: string }[]>`
         SELECT id FROM bookings
@@ -58,10 +60,12 @@ export class BookingService {
                 );
             }
 
+            console.log("[BookingService] Step 2: Generating booking number...");
             // ── Step 2: Generate booking number ──
             const count = await tx.booking.count({ where: { branchId: data.branchId } });
             const bookingNumber = generateRefNumber("BK", count + 1);
 
+            console.log("[BookingService] Step 3: Creating booking...");
             // ── Step 3: Create booking ──
             const booking = await tx.booking.create({
                 data: {
@@ -87,6 +91,7 @@ export class BookingService {
                 },
             });
 
+            console.log("[BookingService] Step 4: Creating invoice and payment...");
             // ── Step 4: Create Associated Invoice & Advance Payment ──
             const invCount = await tx.invoice.count({ where: { branchId: data.branchId } });
             const invoiceNumber = generateRefNumber("INV", invCount + 1);
@@ -122,10 +127,29 @@ export class BookingService {
                 });
             }
 
+            console.log("[BookingService] Step 5: Updating lead status...");
+            // ── Step 5: Auto-update lead status ──
+            await tx.lead.update({
+                where: { id: data.leadId },
+                data: { status: "ADVANCE" }
+            });
+
+            // ── Step 6: Send SMS Notification (Async) ──
+            const leadDetails = await tx.lead.findUnique({
+                where: { id: data.leadId },
+                select: { customerName: true, customerPhone: true }
+            });
+
+            if (leadDetails) {
+                // Not awaiting to avoid blocking response
+                TwilioService.sendBookingNotification(booking, leadDetails);
+            }
+
+            console.log("[BookingService] Step 6: Booking success.");
             return booking;
         }, {
             isolationLevel: "Serializable" as const,
-            timeout: 10000,
+            timeout: 15000,
         });
     }
 

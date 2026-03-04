@@ -65,7 +65,8 @@ function AppRoutes() {
             >
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/branches" element={<BranchesPage />} />
-                <Route path="/leads" element={<LeadsPage />} />
+                <Route path="/leads/pipeline" element={<LeadsPage />} />
+                <Route path="/leads" element={<Navigate to="/leads/pipeline" replace />} />
                 <Route path="/bookings" element={<BookingsPage />} />
                 <Route path="/bookings/new" element={<NewBookingPage />} />
                 <Route path="/events/:id" element={<EventDetailsPage />} />
